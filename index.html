@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eclipse Protocol</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="game-wrapper">
+    <div class="hud">
+      <span>PONTOS: <strong id="score">0</strong></span>
+      <span>VIDAS: <strong id="lives">3</strong></span>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="startScreen" class="overlay">
+      <h1>ECLIPSE PROTOCOL</h1>
+      <p>Destrua os inimigos antes que eles cheguem até você.</p>
+      <p class="controls">← → para mover • ESPAÇO para atirar</p>
+      <button id="startButton">JOGAR</button>
+    </div>
+
+    <div id="gameOverScreen" class="overlay hidden">
+      <h1>GAME OVER</h1>
+      <p>Pontuação: <strong id="finalScore">0</strong></p>
+      <button id="restartButton">JOGAR NOVAMENTE</button>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  background: #050509;
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.game-wrapper {
+  position: relative;
+  width: min(95vw, 800px);
+  height: min(90vh, 700px);
+  border: 2px solid #ff1493;
+  box-shadow: 0 0 30px rgba(255, 20, 147, .35);
+  background: #020205;
+  overflow: hidden;
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background:
+    radial-gradient(circle at center, #10101c 0%, #020205 70%);
+}
+
+.hud {
+  position: absolute;
+  z-index: 5;
+  top: 15px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  letter-spacing: 2px;
+  pointer-events: none;
+}
+
+.hud strong {
+  color: #ff1493;
+}
+
+.overlay {
+  position: absolute;
+  z-index: 10;
+  inset: 0;
+  background: rgba(0, 0, 0, .82);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 30px;
+}
+
+.overlay h1 {
+  color: #ff1493;
+  font-size: clamp(32px, 7vw, 64px);
+  letter-spacing: 5px;
+  text-shadow: 0 0 20px rgba(255, 20, 147, .8);
+  margin-bottom: 20px;
+}
+
+.overlay p {
+  color: #ddd;
+  max-width: 500px;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.controls {
+  color: #aaa !important;
+  font-size: 13px;
+  margin-bottom: 25px !important;
+}
+
+button {
+  border: 2px solid #ff1493;
+  background: transparent;
+  color: #ff1493;
+  padding: 14px 30px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  cursor: pointer;
+  transition: .2s;
+}
+
+button:hover {
+  background: #ff1493;
+  color: #000;
+  box-shadow: 0 0 25px rgba(255, 20, 147, .7);
+}
+
+.hidden {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .game-wrapper {
+    width: 100vw;
+    height: 100vh;
+    border: 0;
+  }
+
+  .hud {
+    top: 12px;
+  }
+}
