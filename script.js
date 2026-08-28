@@ -96,16 +96,675 @@ const isTouchDevice =
   navigator.msMaxTouchPoints > 0;
 
 
-/*
-  Adiciona a classe ao body
-  somente em dispositivos touch.
-*/
-
 if (isTouchDevice) {
 
   document.body.classList.add(
     "touch-device"
   );
+
+}
+
+
+// ============================================================
+// SISTEMA DE ÁUDIO
+// ============================================================
+
+let audioContext = null;
+
+let masterGain = null;
+
+let musicGain = null;
+
+let musicInterval = null;
+
+let musicStep = 0;
+
+let musicPlaying = false;
+
+
+/*
+  Inicializa o sistema de áudio.
+
+  A criação só acontece após uma interação do usuário,
+  pois navegadores bloqueiam autoplay com áudio.
+*/
+
+function initializeAudio() {
+
+  if (!audioContext) {
+
+    const AudioContextClass =
+      window.AudioContext ||
+      window.webkitAudioContext;
+
+
+    audioContext =
+      new AudioContextClass();
+
+
+    /*
+      Controle geral de volume.
+    */
+
+    masterGain =
+      audioContext.createGain();
+
+
+    masterGain.gain.value = 0.45;
+
+
+    masterGain.connect(
+      audioContext.destination
+    );
+
+
+    /*
+      Volume específico da música.
+    */
+
+    musicGain =
+      audioContext.createGain();
+
+
+    musicGain.gain.value = 0.20;
+
+
+    musicGain.connect(
+      masterGain
+    );
+
+  }
+
+
+  /*
+    Alguns navegadores deixam o contexto
+    inicialmente suspenso.
+  */
+
+  if (
+    audioContext.state ===
+    "suspended"
+  ) {
+
+    audioContext.resume();
+
+  }
+
+}
+
+
+// ============================================================
+// FUNÇÃO AUXILIAR PARA TOCAR NOTAS
+// ============================================================
+
+function playTone(
+  frequency,
+  duration,
+  type = "sine",
+  volume = 0.1,
+  destination = masterGain
+) {
+
+  if (
+    !audioContext ||
+    !destination
+  ) {
+    return;
+  }
+
+
+  const oscillator =
+    audioContext.createOscillator();
+
+
+  const gain =
+    audioContext.createGain();
+
+
+  oscillator.type =
+    type;
+
+
+  oscillator.frequency.setValueAtTime(
+    frequency,
+    audioContext.currentTime
+  );
+
+
+  gain.gain.setValueAtTime(
+    0.0001,
+    audioContext.currentTime
+  );
+
+
+  gain.gain.exponentialRampToValueAtTime(
+    volume,
+    audioContext.currentTime + 0.01
+  );
+
+
+  gain.gain.exponentialRampToValueAtTime(
+    0.0001,
+    audioContext.currentTime + duration
+  );
+
+
+  oscillator.connect(gain);
+
+  gain.connect(destination);
+
+
+  oscillator.start();
+
+
+  oscillator.stop(
+    audioContext.currentTime +
+    duration +
+    0.05
+  );
+
+}
+
+
+// ============================================================
+// SOM DE TIRO
+// ============================================================
+
+function playShootSound() {
+
+  if (!audioContext) {
+    return;
+  }
+
+
+  const oscillator =
+    audioContext.createOscillator();
+
+
+  const gain =
+    audioContext.createGain();
+
+
+  oscillator.type =
+    "square";
+
+
+  const now =
+    audioContext.currentTime;
+
+
+  /*
+    O som começa em uma frequência alta
+    e desce rapidamente.
+  */
+
+  oscillator.frequency.setValueAtTime(
+    900,
+    now
+  );
+
+
+  oscillator.frequency.exponentialRampToValueAtTime(
+    220,
+    now + 0.12
+  );
+
+
+  gain.gain.setValueAtTime(
+    0.14,
+    now
+  );
+
+
+  gain.gain.exponentialRampToValueAtTime(
+    0.001,
+    now + 0.12
+  );
+
+
+  oscillator.connect(gain);
+
+  gain.connect(masterGain);
+
+
+  oscillator.start(now);
+
+  oscillator.stop(
+    now + 0.13
+  );
+
+}
+
+
+// ============================================================
+// CRIAR BUFFER DE RUÍDO
+// ============================================================
+
+function createNoiseBuffer(
+  duration = 0.4
+) {
+
+  const bufferSize =
+    audioContext.sampleRate *
+    duration;
+
+
+  const buffer =
+    audioContext.createBuffer(
+
+      1,
+
+      bufferSize,
+
+      audioContext.sampleRate
+
+    );
+
+
+  const data =
+    buffer.getChannelData(0);
+
+
+  for (
+    let i = 0;
+    i < bufferSize;
+    i++
+  ) {
+
+    /*
+      Ruído com queda gradual.
+    */
+
+    const progress =
+      i / bufferSize;
+
+
+    data[i] =
+      (Math.random() * 2 - 1) *
+      (1 - progress);
+
+  }
+
+
+  return buffer;
+
+}
+
+
+// ============================================================
+// SOM DE EXPLOSÃO
+// ============================================================
+
+function playExplosionSound() {
+
+  if (!audioContext) {
+    return;
+  }
+
+
+  const now =
+    audioContext.currentTime;
+
+
+  // ----------------------------------------------------------
+  // RUÍDO DA EXPLOSÃO
+  // ----------------------------------------------------------
+
+  const noise =
+    audioContext.createBufferSource();
+
+
+  const noiseGain =
+    audioContext.createGain();
+
+
+  const noiseFilter =
+    audioContext.createBiquadFilter();
+
+
+  noise.buffer =
+    createNoiseBuffer(0.35);
+
+
+  noiseFilter.type =
+    "lowpass";
+
+
+  noiseFilter.frequency.setValueAtTime(
+    1800,
+    now
+  );
+
+
+  noiseFilter.frequency.exponentialRampToValueAtTime(
+    120,
+    now + 0.35
+  );
+
+
+  noiseGain.gain.setValueAtTime(
+    0.28,
+    now
+  );
+
+
+  noiseGain.gain.exponentialRampToValueAtTime(
+    0.001,
+    now + 0.35
+  );
+
+
+  noise.connect(noiseFilter);
+
+  noiseFilter.connect(noiseGain);
+
+  noiseGain.connect(masterGain);
+
+
+  noise.start(now);
+
+
+  // ----------------------------------------------------------
+  // IMPACTO GRAVE
+  // ----------------------------------------------------------
+
+  const oscillator =
+    audioContext.createOscillator();
+
+
+  const oscillatorGain =
+    audioContext.createGain();
+
+
+  oscillator.type =
+    "sawtooth";
+
+
+  oscillator.frequency.setValueAtTime(
+    160,
+    now
+  );
+
+
+  oscillator.frequency.exponentialRampToValueAtTime(
+    45,
+    now + 0.25
+  );
+
+
+  oscillatorGain.gain.setValueAtTime(
+    0.18,
+    now
+  );
+
+
+  oscillatorGain.gain.exponentialRampToValueAtTime(
+    0.001,
+    now + 0.25
+  );
+
+
+  oscillator.connect(
+    oscillatorGain
+  );
+
+
+  oscillatorGain.connect(
+    masterGain
+  );
+
+
+  oscillator.start(now);
+
+
+  oscillator.stop(
+    now + 0.28
+  );
+
+}
+
+
+// ============================================================
+// SOM DE PERDA DE VIDA
+// ============================================================
+
+function playPlayerHitSound() {
+
+  if (!audioContext) {
+    return;
+  }
+
+
+  const oscillator =
+    audioContext.createOscillator();
+
+
+  const gain =
+    audioContext.createGain();
+
+
+  const now =
+    audioContext.currentTime;
+
+
+  oscillator.type =
+    "sawtooth";
+
+
+  oscillator.frequency.setValueAtTime(
+    260,
+    now
+  );
+
+
+  oscillator.frequency.exponentialRampToValueAtTime(
+    60,
+    now + 0.5
+  );
+
+
+  gain.gain.setValueAtTime(
+    0.22,
+    now
+  );
+
+
+  gain.gain.exponentialRampToValueAtTime(
+    0.001,
+    now + 0.5
+  );
+
+
+  oscillator.connect(gain);
+
+  gain.connect(masterGain);
+
+
+  oscillator.start(now);
+
+
+  oscillator.stop(
+    now + 0.52
+  );
+
+}
+
+
+// ============================================================
+// MÚSICA DE FUNDO
+// ============================================================
+
+/*
+  Sequência de notas com uma atmosfera
+  arcade / sci-fi.
+*/
+
+const musicSequence = [
+
+  110,
+  164.81,
+  196,
+  220,
+
+  110,
+  146.83,
+  174.61,
+  196,
+
+  98,
+  146.83,
+  174.61,
+  220,
+
+  110,
+  164.81,
+  220,
+  261.63
+
+];
+
+
+/*
+  Cada nota possui duração curta.
+
+  O intervalo cria um loop contínuo.
+*/
+
+function playMusicStep() {
+
+  if (
+    !musicPlaying ||
+    !audioContext
+  ) {
+    return;
+  }
+
+
+  const frequency =
+    musicSequence[
+      musicStep
+    ];
+
+
+  // ----------------------------------------------------------
+  // CAMADA PRINCIPAL
+  // ----------------------------------------------------------
+
+  playTone(
+
+    frequency,
+
+    0.24,
+
+    "triangle",
+
+    0.18,
+
+    musicGain
+
+  );
+
+
+  // ----------------------------------------------------------
+  // HARMONIA
+  // ----------------------------------------------------------
+
+  if (
+    musicStep % 2 === 0
+  ) {
+
+    playTone(
+
+      frequency * 2,
+
+      0.14,
+
+      "sine",
+
+      0.06,
+
+      musicGain
+
+    );
+
+  }
+
+
+  // ----------------------------------------------------------
+  // PRÓXIMA NOTA
+  // ----------------------------------------------------------
+
+  musicStep++;
+
+
+  if (
+    musicStep >=
+    musicSequence.length
+  ) {
+
+    musicStep = 0;
+
+  }
+
+}
+
+
+// ============================================================
+// INICIAR MÚSICA
+// ============================================================
+
+function startBackgroundMusic() {
+
+  if (musicPlaying) {
+    return;
+  }
+
+
+  if (!audioContext) {
+    return;
+  }
+
+
+  musicPlaying = true;
+
+
+  musicStep = 0;
+
+
+  playMusicStep();
+
+
+  musicInterval =
+    setInterval(
+
+      playMusicStep,
+
+      280
+
+    );
+
+}
+
+
+// ============================================================
+// PARAR MÚSICA
+// ============================================================
+
+function stopBackgroundMusic() {
+
+  musicPlaying = false;
+
+
+  if (musicInterval) {
+
+    clearInterval(
+      musicInterval
+    );
+
+
+    musicInterval = null;
+
+  }
 
 }
 
@@ -118,11 +777,6 @@ function updatePlayerPosition(rect) {
 
   /*
     COMPUTADOR
-    ----------------------------------------------------------
-
-    Mantemos exatamente a posição original.
-
-    A nave continua próxima da parte inferior.
   */
 
   if (!isTouchDevice) {
@@ -137,16 +791,6 @@ function updatePlayerPosition(rect) {
 
   /*
     CELULAR
-    ----------------------------------------------------------
-
-    Aqui está a correção principal.
-
-    Em vez de simplesmente colocar a nave
-    em "rect.height - 65", calculamos a posição
-    considerando a altura REAL dos controles.
-
-    Isso garante que a nave fique acima dos
-    botões.
   */
 
   const controlsHeight =
@@ -154,22 +798,12 @@ function updatePlayerPosition(rect) {
 
 
   /*
-    Espaço extra entre a nave e os controles.
-
-    Quanto maior esse número,
-    maior será a distância.
+    DISTÂNCIA ENTRE A NAVE
+    E OS CONTROLES.
   */
 
   const gap = 40;
 
-
-  /*
-    A parte inferior dos controles é definida
-    pelo CSS.
-
-    Como a nave possui aproximadamente 32px
-    de altura, adicionamos essa altura ao cálculo.
-  */
 
   player.y =
     rect.height -
@@ -178,12 +812,6 @@ function updatePlayerPosition(rect) {
     player.height -
     gap;
 
-
-  /*
-    Proteção para telas muito pequenas.
-
-    Nunca deixa a nave subir demais.
-  */
 
   const minimumY = 80;
 
@@ -206,12 +834,14 @@ function resizeCanvas() {
   const rect =
     canvas.getBoundingClientRect();
 
+
   const dpr =
     window.devicePixelRatio || 1;
 
 
   canvas.width =
     rect.width * dpr;
+
 
   canvas.height =
     rect.height * dpr;
@@ -229,26 +859,8 @@ function resizeCanvas() {
   );
 
 
-  /*
-    Define a posição vertical
-    da nave.
-
-    No celular é calculada acima
-    dos controles.
-
-    No computador continua
-    como antes.
-  */
-
   updatePlayerPosition(rect);
 
-
-  /*
-    Centraliza a nave horizontalmente
-    somente quando o canvas é redimensionado.
-
-    Isso preserva o comportamento original.
-  */
 
   player.x =
     rect.width / 2 -
@@ -264,6 +876,7 @@ function resizeCanvas() {
 function createStars() {
 
   stars = [];
+
 
   const rect =
     canvas.getBoundingClientRect();
@@ -318,6 +931,7 @@ function resetGame() {
   scoreElement.textContent =
     score;
 
+
   livesElement.textContent =
     lives;
 
@@ -327,18 +941,10 @@ function resetGame() {
   createStars();
 
 
-  /*
-    Limpa controles.
-  */
-
   keys["ArrowLeft"] = false;
-
   keys["ArrowRight"] = false;
-
   keys["a"] = false;
-
   keys["d"] = false;
-
   keys[" "] = false;
 
 
@@ -346,9 +952,11 @@ function resetGame() {
     "active"
   );
 
+
   moveRightButton.classList.remove(
     "active"
   );
+
 
   shootButton.classList.remove(
     "active"
@@ -363,12 +971,21 @@ function resetGame() {
 
 function startGame() {
 
+  /*
+    Inicializa o áudio após
+    interação do jogador.
+  */
+
+  initializeAudio();
+
+
   resetGame();
 
 
   startScreen.classList.add(
     "hidden"
   );
+
 
   gameOverScreen.classList.add(
     "hidden"
@@ -377,8 +994,12 @@ function startGame() {
 
   running = true;
 
+
   lastTime =
     performance.now();
+
+
+  startBackgroundMusic();
 
 
   cancelAnimationFrame(
@@ -403,6 +1024,9 @@ function gameOver() {
   running = false;
 
 
+  stopBackgroundMusic();
+
+
   finalScore.textContent =
     score;
 
@@ -412,18 +1036,10 @@ function gameOver() {
   );
 
 
-  /*
-    Libera controles.
-  */
-
   keys["ArrowLeft"] = false;
-
   keys["ArrowRight"] = false;
-
   keys["a"] = false;
-
   keys["d"] = false;
-
   keys[" "] = false;
 
 
@@ -431,9 +1047,11 @@ function gameOver() {
     "active"
   );
 
+
   moveRightButton.classList.remove(
     "active"
   );
+
 
   shootButton.classList.remove(
     "active"
@@ -453,7 +1071,9 @@ function gameOver() {
 
 function shoot() {
 
-  if (!running) return;
+  if (!running) {
+    return;
+  }
 
 
   bullets.push({
@@ -473,6 +1093,13 @@ function shoot() {
     speed: 650
 
   });
+
+
+  /*
+    SOM DO TIRO
+  */
+
+  playShootSound();
 
 }
 
@@ -554,7 +1181,7 @@ function update(delta) {
 
 
   // ==========================================================
-  // MOVIMENTO DA NAVE
+  // MOVIMENTO
   // ==========================================================
 
   if (
@@ -582,11 +1209,6 @@ function update(delta) {
 
   }
 
-
-  /*
-    Impede a nave de sair da tela
-    horizontalmente.
-  */
 
   player.x = Math.max(
 
@@ -724,10 +1346,18 @@ function update(delta) {
           1
         );
 
+
         bullets.splice(
           j,
           1
         );
+
+
+        /*
+          SOM DE EXPLOSÃO
+        */
+
+        playExplosionSound();
 
 
         score += 10;
@@ -769,6 +1399,13 @@ function update(delta) {
       );
 
 
+      /*
+        SOM DE COLISÃO
+      */
+
+      playPlayerHitSound();
+
+
       lives--;
 
 
@@ -803,14 +1440,23 @@ function update(delta) {
   ) {
 
     if (
+
       enemies[i].y >
       rect.height
+
     ) {
 
       enemies.splice(
         i,
         1
       );
+
+
+      /*
+        SOM DE VIDA PERDIDA
+      */
+
+      playPlayerHitSound();
 
 
       lives--;
@@ -845,8 +1491,10 @@ function update(delta) {
 
 
       if (
+
         star.y >
         rect.height
+
       ) {
 
         star.y = 0;
@@ -927,120 +1575,77 @@ function drawBackground() {
 
 function drawPlayer() {
 
-  const x =
-    player.x;
-
-  const y =
-    player.y;
+  const x = player.x;
+  const y = player.y;
 
 
   ctx.save();
 
 
-  ctx.shadowBlur =
-    20;
-
-  ctx.shadowColor =
-    "#ff1493";
+  ctx.shadowBlur = 20;
+  ctx.shadowColor = "#ff1493";
 
 
-  ctx.fillStyle =
-    "#ff1493";
+  ctx.fillStyle = "#ff1493";
 
 
   ctx.beginPath();
 
 
   ctx.moveTo(
-
-    x +
-    player.width / 2,
-
+    x + player.width / 2,
     y
-
   );
 
 
   ctx.lineTo(
-
-    x +
-    player.width,
-
-    y +
-    player.height
-
+    x + player.width,
+    y + player.height
   );
 
 
   ctx.lineTo(
-
-    x +
-    player.width / 2,
-
-    y +
-    player.height -
-    8
-
+    x + player.width / 2,
+    y + player.height - 8
   );
 
 
   ctx.lineTo(
-
     x,
-
-    y +
-    player.height
-
+    y + player.height
   );
 
 
   ctx.closePath();
-
 
   ctx.fill();
 
 
-  ctx.fillStyle =
-    "#ffffff";
+  ctx.fillStyle = "#ffffff";
 
 
   ctx.beginPath();
 
 
   ctx.moveTo(
-
-    x +
-    player.width / 2,
-
+    x + player.width / 2,
     y + 8
-
   );
 
 
   ctx.lineTo(
-
-    x +
-    player.width / 2 +
-    7,
-
+    x + player.width / 2 + 7,
     y + 20
-
   );
 
 
   ctx.lineTo(
-
-    x +
-    player.width / 2 -
-    7,
-
+    x + player.width / 2 - 7,
     y + 20
-
   );
 
 
   ctx.closePath();
-
 
   ctx.fill();
 
@@ -1062,25 +1667,19 @@ function drawBullets() {
       ctx.save();
 
 
-      ctx.shadowBlur =
-        15;
-
-      ctx.shadowColor =
-        "#ffffff";
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = "#ffffff";
 
 
-      ctx.fillStyle =
-        "#ffffff";
+      ctx.fillStyle = "#ffffff";
 
 
       ctx.fillRect(
 
         bullet.x,
-
         bullet.y,
 
         bullet.width,
-
         bullet.height
 
       );
@@ -1122,16 +1721,11 @@ function drawEnemies() {
       );
 
 
-      ctx.shadowBlur =
-        15;
-
-      ctx.shadowColor =
-        "#ff1493";
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = "#ff1493";
 
 
-      ctx.strokeStyle =
-        "#ff1493";
-
+      ctx.strokeStyle = "#ff1493";
       ctx.lineWidth = 3;
 
 
@@ -1148,9 +1742,7 @@ function drawEnemies() {
       );
 
 
-      ctx.strokeStyle =
-        "#ffffff";
-
+      ctx.strokeStyle = "#ffffff";
       ctx.lineWidth = 2;
 
 
@@ -1158,38 +1750,26 @@ function drawEnemies() {
 
 
       ctx.moveTo(
-
         -enemy.width / 2,
-
         0
-
       );
 
 
       ctx.lineTo(
-
         enemy.width / 2,
-
         0
-
       );
 
 
       ctx.moveTo(
-
         0,
-
         -enemy.height / 2
-
       );
 
 
       ctx.lineTo(
-
         0,
-
         enemy.height / 2
-
       );
 
 
@@ -1316,17 +1896,13 @@ window.addEventListener(
 
 
 // ============================================================
-// TOUCH CONTROLS
+// CONTROLES TOUCH
 // ============================================================
 
 function setupTouchButton(
   button,
   key
 ) {
-
-  // ----------------------------------------------------------
-  // POINTER DOWN
-  // ----------------------------------------------------------
 
   button.addEventListener(
     "pointerdown",
@@ -1365,10 +1941,6 @@ function setupTouchButton(
   );
 
 
-  // ----------------------------------------------------------
-  // POINTER UP
-  // ----------------------------------------------------------
-
   button.addEventListener(
     "pointerup",
     event => {
@@ -1386,10 +1958,6 @@ function setupTouchButton(
     }
   );
 
-
-  // ----------------------------------------------------------
-  // POINTER CANCEL
-  // ----------------------------------------------------------
 
   button.addEventListener(
     "pointercancel",
@@ -1409,10 +1977,6 @@ function setupTouchButton(
   );
 
 
-  // ----------------------------------------------------------
-  // LOST POINTER
-  // ----------------------------------------------------------
-
   button.addEventListener(
     "lostpointercapture",
     () => {
@@ -1427,10 +1991,6 @@ function setupTouchButton(
     }
   );
 
-
-  // ----------------------------------------------------------
-  // CONTEXT MENU
-  // ----------------------------------------------------------
 
   button.addEventListener(
     "contextmenu",

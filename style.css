@@ -4,7 +4,6 @@
 
 * {
   box-sizing: border-box;
-
   margin: 0;
   padding: 0;
 }
@@ -32,11 +31,6 @@ body {
   align-items: center;
 
   overflow: hidden;
-
-  /*
-    Impede gestos do navegador
-    durante o jogo.
-  */
 
   touch-action: none;
 }
@@ -186,7 +180,7 @@ canvas {
 
 
 /* ============================================================
-   BOTÕES NORMAIS
+   BOTÕES
    ============================================================ */
 
 button {
@@ -241,7 +235,7 @@ button:active {
 
 
 /* ============================================================
-   TEXTO DOS CONTROLES MOBILE
+   TEXTO CONTROLE MOBILE
    ============================================================ */
 
 .mobile-controls-info {
@@ -262,11 +256,6 @@ button:active {
   right: 0;
 
   bottom: 18px;
-
-  /*
-    Esquerda e direita ficam em lados
-    opostos da tela.
-  */
 
   display: none;
 
@@ -380,7 +369,7 @@ button:active {
 
 
 /* ============================================================
-   BOTÃO PRESSIONADO
+   BOTÕES PRESSIONADOS
    ============================================================ */
 
 .touch-button:active,
@@ -406,7 +395,7 @@ button:active {
 
 
 /* ============================================================
-   DISPOSITIVO TOUCH
+   DISPOSITIVOS TOUCH
    ============================================================ */
 
 body.touch-device .mobile-controls {
@@ -425,14 +414,13 @@ body.touch-device .desktop-controls {
 
 
 /* ============================================================
-   CELULAR
+   MOBILE
    ============================================================ */
 
 @media (max-width: 600px) {
 
   .game-wrapper {
     width: 100vw;
-
     height: 100vh;
 
     border: 0;
@@ -450,13 +438,6 @@ body.touch-device .desktop-controls {
 
 
   .mobile-controls {
-    /*
-      Área inferior dos controles.
-
-      O JS também utiliza essa posição
-      para calcular onde colocar a nave.
-    */
-
     bottom:
       max(
         24px,
@@ -523,7 +504,7 @@ body.touch-device .desktop-controls {
 
 
 /* ============================================================
-   CELULAR LANDSCAPE
+   LANDSCAPE
    ============================================================ */
 
 @media (max-height: 500px) {
