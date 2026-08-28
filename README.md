@@ -1,4 +1,4 @@
-# Space Defender
+# Eclipse Protocol
 
 Jogo arcade de nave com estética em neon, destrua os inimigos antes que eles cheguem até você! 
 Desenvolvido em HTML, CSS e JavaScript. 
