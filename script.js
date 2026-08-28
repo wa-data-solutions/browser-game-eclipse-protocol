@@ -76,7 +76,7 @@ const player = {
 
 
 // ============================================================
-// OBJETOS
+// OBJETOS DO JOGO
 // ============================================================
 
 let bullets = [];
@@ -97,11 +97,8 @@ const isTouchDevice =
 
 
 /*
-  Se for um dispositivo touch,
-  adicionamos a classe ao body.
-
-  O CSS utiliza essa classe para
-  mostrar os controles.
+  Adiciona a classe ao body
+  somente em dispositivos touch.
 */
 
 if (isTouchDevice) {
@@ -109,6 +106,93 @@ if (isTouchDevice) {
   document.body.classList.add(
     "touch-device"
   );
+
+}
+
+
+// ============================================================
+// POSIÇÃO DA NAVE
+// ============================================================
+
+function updatePlayerPosition(rect) {
+
+  /*
+    COMPUTADOR
+    ----------------------------------------------------------
+
+    Mantemos exatamente a posição original.
+
+    A nave continua próxima da parte inferior.
+  */
+
+  if (!isTouchDevice) {
+
+    player.y =
+      rect.height - 65;
+
+    return;
+
+  }
+
+
+  /*
+    CELULAR
+    ----------------------------------------------------------
+
+    Aqui está a correção principal.
+
+    Em vez de simplesmente colocar a nave
+    em "rect.height - 65", calculamos a posição
+    considerando a altura REAL dos controles.
+
+    Isso garante que a nave fique acima dos
+    botões.
+  */
+
+  const controlsHeight =
+    mobileControls.offsetHeight;
+
+
+  /*
+    Espaço extra entre a nave e os controles.
+
+    Quanto maior esse número,
+    maior será a distância.
+  */
+
+  const gap = 8;
+
+
+  /*
+    A parte inferior dos controles é definida
+    pelo CSS.
+
+    Como a nave possui aproximadamente 32px
+    de altura, adicionamos essa altura ao cálculo.
+  */
+
+  player.y =
+    rect.height -
+    controlsHeight -
+    18 -
+    player.height -
+    gap;
+
+
+  /*
+    Proteção para telas muito pequenas.
+
+    Nunca deixa a nave subir demais.
+  */
+
+  const minimumY = 80;
+
+
+  player.y =
+    Math.max(
+      minimumY,
+      player.y
+    );
 
 }
 
@@ -146,13 +230,25 @@ function resizeCanvas() {
 
 
   /*
-    Posiciona a nave próximo
-    à parte inferior do jogo.
+    Define a posição vertical
+    da nave.
+
+    No celular é calculada acima
+    dos controles.
+
+    No computador continua
+    como antes.
   */
 
-  player.y =
-    rect.height - 65;
+  updatePlayerPosition(rect);
 
+
+  /*
+    Centraliza a nave horizontalmente
+    somente quando o canvas é redimensionado.
+
+    Isso preserva o comportamento original.
+  */
 
   player.x =
     rect.width / 2 -
@@ -232,7 +328,7 @@ function resetGame() {
 
 
   /*
-    Limpa os controles.
+    Limpa controles.
   */
 
   keys["ArrowLeft"] = false;
@@ -317,7 +413,7 @@ function gameOver() {
 
 
   /*
-    Solta todos os controles.
+    Libera controles.
   */
 
   keys["ArrowLeft"] = false;
@@ -461,21 +557,6 @@ function update(delta) {
   // MOVIMENTO DA NAVE
   // ==========================================================
 
-  /*
-    COMPUTADOR:
-
-    ArrowLeft
-    ArrowRight
-    A
-    D
-
-    CELULAR:
-
-    Os botões touch ativam
-    ArrowLeft / ArrowRight.
-  */
-
-
   if (
 
     keys["ArrowLeft"] ||
@@ -503,8 +584,8 @@ function update(delta) {
 
 
   /*
-    Impede a nave de sair
-    da tela.
+    Impede a nave de sair da tela
+    horizontalmente.
   */
 
   player.x = Math.max(
@@ -529,14 +610,6 @@ function update(delta) {
 
   shootTimer -= delta;
 
-
-  /*
-    O mesmo sistema funciona para:
-
-    ESPAÇO no computador
-
-    BOTÃO DE TIRO no celular
-  */
 
   if (
 
@@ -1198,24 +1271,12 @@ window.addEventListener(
     keys[event.key] = true;
 
 
-    /*
-      Impede o espaço de
-      fazer scroll na página.
-    */
-
     if (event.key === " ") {
 
       event.preventDefault();
 
     }
 
-
-    /*
-      Inicia o jogo usando:
-
-      ESPAÇO
-      ENTER
-    */
 
     if (
 
@@ -1258,23 +1319,13 @@ window.addEventListener(
 // TOUCH CONTROLS
 // ============================================================
 
-/*
-  Configura um botão touch.
-
-  Enquanto o usuário mantém o dedo
-  pressionado, a tecla permanece ativa.
-
-  Quando solta, a tecla é liberada.
-*/
-
 function setupTouchButton(
   button,
   key
 ) {
 
-
   // ----------------------------------------------------------
-  // TOUCH / POINTER DOWN
+  // POINTER DOWN
   // ----------------------------------------------------------
 
   button.addEventListener(
@@ -1292,15 +1343,6 @@ function setupTouchButton(
       );
 
 
-      /*
-        Captura o ponteiro.
-
-        Isso melhora bastante a experiência
-        em celulares, pois mesmo que o dedo
-        saia alguns pixels do botão,
-        conseguimos detectar o lançamento.
-      */
-
       if (
         button.setPointerCapture
       ) {
@@ -1313,7 +1355,7 @@ function setupTouchButton(
 
         } catch (error) {
 
-          // Navegador sem suporte completo.
+          // Ignora incompatibilidades.
 
         }
 
@@ -1368,7 +1410,7 @@ function setupTouchButton(
 
 
   // ----------------------------------------------------------
-  // LOST POINTER CAPTURE
+  // LOST POINTER
   // ----------------------------------------------------------
 
   button.addEventListener(
@@ -1403,12 +1445,8 @@ function setupTouchButton(
 
 
 // ============================================================
-// CONFIGURA OS CONTROLES
+// CONFIGURA CONTROLES
 // ============================================================
-
-/*
-  ESQUERDA
-*/
 
 setupTouchButton(
   moveLeftButton,
@@ -1416,22 +1454,11 @@ setupTouchButton(
 );
 
 
-/*
-  DIREITA
-*/
-
 setupTouchButton(
   moveRightButton,
   "ArrowRight"
 );
 
-
-/*
-  TIRO
-
-  Utiliza a mesma "tecla"
-  do espaço do computador.
-*/
 
 setupTouchButton(
   shootButton,
@@ -1487,7 +1514,7 @@ window.addEventListener(
         resizeCanvas();
 
       },
-      100
+      150
     );
 
   }
