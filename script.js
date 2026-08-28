@@ -160,7 +160,7 @@ function updatePlayerPosition(rect) {
     maior será a distância.
   */
 
-  const gap = 8;
+  const gap = 40;
 
 
   /*
