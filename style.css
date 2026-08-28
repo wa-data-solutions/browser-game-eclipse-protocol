@@ -4,115 +4,494 @@
   padding: 0;
 }
 
+
+/* ============================================================
+   BODY
+   ============================================================ */
+
 body {
   min-height: 100vh;
+
   background: #050509;
+
   color: #fff;
-  font-family: Arial, Helvetica, sans-serif;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
   display: flex;
+
   justify-content: center;
   align-items: center;
+
   overflow: hidden;
+
+  /* Evita gestos do navegador durante o jogo */
+  touch-action: none;
 }
+
+
+/* ============================================================
+   ÁREA PRINCIPAL DO JOGO
+   ============================================================ */
 
 .game-wrapper {
   position: relative;
+
   width: min(95vw, 800px);
   height: min(90vh, 700px);
+
   border: 2px solid #ff1493;
-  box-shadow: 0 0 30px rgba(255, 20, 147, .35);
+
+  box-shadow:
+    0 0 30px rgba(255, 20, 147, .35);
+
   background: #020205;
+
   overflow: hidden;
+
+  touch-action: none;
 }
+
+
+/* ============================================================
+   CANVAS
+   ============================================================ */
 
 canvas {
   width: 100%;
   height: 100%;
+
   display: block;
+
   background:
-    radial-gradient(circle at center, #10101c 0%, #020205 70%);
+    radial-gradient(
+      circle at center,
+      #10101c 0%,
+      #020205 70%
+    );
+
+  touch-action: none;
 }
+
+
+/* ============================================================
+   HUD
+   ============================================================ */
 
 .hud {
   position: absolute;
+
   z-index: 5;
+
   top: 15px;
   left: 20px;
   right: 20px;
+
   display: flex;
+
   justify-content: space-between;
+
   font-size: 14px;
+
   letter-spacing: 2px;
+
   pointer-events: none;
+
+  user-select: none;
 }
+
 
 .hud strong {
   color: #ff1493;
 }
 
+
+/* ============================================================
+   TELAS / OVERLAYS
+   ============================================================ */
+
 .overlay {
   position: absolute;
+
   z-index: 10;
+
   inset: 0;
-  background: rgba(0, 0, 0, .82);
+
+  background:
+    rgba(0, 0, 0, .82);
+
   display: flex;
+
   flex-direction: column;
+
   justify-content: center;
+
   align-items: center;
+
   text-align: center;
+
   padding: 30px;
+
+  user-select: none;
 }
+
 
 .overlay h1 {
   color: #ff1493;
-  font-size: clamp(32px, 7vw, 64px);
+
+  font-size:
+    clamp(32px, 7vw, 64px);
+
   letter-spacing: 5px;
-  text-shadow: 0 0 20px rgba(255, 20, 147, .8);
+
+  text-shadow:
+    0 0 20px rgba(255, 20, 147, .8);
+
   margin-bottom: 20px;
 }
 
+
 .overlay p {
   color: #ddd;
+
   max-width: 500px;
+
   line-height: 1.6;
+
   margin-bottom: 10px;
 }
 
+
 .controls {
   color: #aaa !important;
+
   font-size: 13px;
+
   margin-bottom: 25px !important;
 }
 
+
+/* ============================================================
+   BOTÕES
+   ============================================================ */
+
 button {
   border: 2px solid #ff1493;
+
   background: transparent;
+
   color: #ff1493;
+
   padding: 14px 30px;
+
   font-weight: bold;
+
   letter-spacing: 3px;
+
   cursor: pointer;
+
   transition: .2s;
+
+  user-select: none;
+
+  -webkit-user-select: none;
+
+  -webkit-tap-highlight-color: transparent;
+
+  touch-action: manipulation;
 }
+
 
 button:hover {
   background: #ff1493;
+
   color: #000;
-  box-shadow: 0 0 25px rgba(255, 20, 147, .7);
+
+  box-shadow:
+    0 0 25px rgba(255, 20, 147, .7);
 }
+
+
+button:active {
+  transform: scale(.96);
+}
+
+
+/* ============================================================
+   HIDDEN
+   ============================================================ */
 
 .hidden {
   display: none;
 }
 
+
+/* ============================================================
+   INFORMAÇÕES DE CONTROLE MOBILE
+   ============================================================ */
+
+/*
+  Por padrão, essa mensagem não aparece.
+*/
+
+.mobile-controls-info {
+  display: none;
+}
+
+
+/* ============================================================
+   CONTROLES TOUCH
+   ============================================================ */
+
+/*
+  Por padrão os controles mobile ficam escondidos.
+
+  O JavaScript detecta dispositivos touch e adiciona
+  a classe "touch-device" no body.
+*/
+
+.mobile-controls {
+  position: absolute;
+
+  z-index: 20;
+
+  left: 0;
+  right: 0;
+  bottom: 20px;
+
+  display: none;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  padding:
+    0 20px;
+
+  pointer-events: none;
+
+  user-select: none;
+}
+
+
+/*
+  Cada botão touch
+*/
+
+.touch-button {
+  pointer-events: auto;
+
+  width: 72px;
+  height: 72px;
+
+  padding: 0;
+
+  border-radius: 50%;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 27px;
+
+  letter-spacing: 0;
+
+  color: #ff1493;
+
+  background:
+    rgba(5, 5, 9, .72);
+
+  border:
+    2px solid rgba(255, 20, 147, .85);
+
+  box-shadow:
+    0 0 18px rgba(255, 20, 147, .25);
+
+  backdrop-filter: blur(4px);
+
+  -webkit-backdrop-filter: blur(4px);
+
+  cursor: pointer;
+
+  touch-action: none;
+}
+
+
+/*
+  Botões de movimento
+*/
+
+.movement-button {
+  font-size: 25px;
+}
+
+
+/*
+  Botão de tiro
+*/
+
+.shoot-button {
+  width: 82px;
+  height: 82px;
+
+  font-size: 30px;
+
+  border-color: #fff;
+
+  color: #fff;
+
+  box-shadow:
+    0 0 22px rgba(255, 255, 255, .25);
+}
+
+
+/*
+  Quando o usuário toca no botão
+*/
+
+.touch-button:active,
+.touch-button.active {
+  transform: scale(.90);
+
+  background:
+    rgba(255, 20, 147, .25);
+
+  box-shadow:
+    0 0 30px rgba(255, 20, 147, .65);
+}
+
+
+.shoot-button:active,
+.shoot-button.active {
+  background:
+    rgba(255, 255, 255, .18);
+
+  box-shadow:
+    0 0 30px rgba(255, 255, 255, .6);
+}
+
+
+/* ============================================================
+   DISPOSITIVOS TOUCH
+   ============================================================ */
+
+body.touch-device .mobile-controls {
+  display: flex;
+}
+
+
+body.touch-device .mobile-controls-info {
+  display: block;
+}
+
+
+body.touch-device .desktop-controls {
+  display: none;
+}
+
+
+/* ============================================================
+   CELULAR
+   ============================================================ */
+
 @media (max-width: 600px) {
+
   .game-wrapper {
     width: 100vw;
+
     height: 100vh;
+
     border: 0;
   }
 
+
   .hud {
     top: 12px;
+
+    left: 18px;
+    right: 18px;
+
+    font-size: 13px;
   }
+
+
+  .mobile-controls {
+    bottom:
+      max(20px, env(safe-area-inset-bottom));
+
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+
+  .touch-button {
+    width: 68px;
+    height: 68px;
+  }
+
+
+  .shoot-button {
+    width: 78px;
+    height: 78px;
+  }
+
+}
+
+
+/* ============================================================
+   CELULARES MUITO PEQUENOS
+   ============================================================ */
+
+@media (max-width: 380px) {
+
+  .mobile-controls {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+
+  .touch-button {
+    width: 62px;
+    height: 62px;
+
+    font-size: 22px;
+  }
+
+
+  .shoot-button {
+    width: 70px;
+    height: 70px;
+
+    font-size: 26px;
+  }
+
+}
+
+
+/* ============================================================
+   ORIENTAÇÃO LANDSCAPE
+   ============================================================ */
+
+@media (max-height: 500px) {
+
+  .mobile-controls {
+    bottom: 12px;
+  }
+
+
+  .touch-button {
+    width: 58px;
+    height: 58px;
+  }
+
+
+  .shoot-button {
+    width: 66px;
+    height: 66px;
+  }
+
 }

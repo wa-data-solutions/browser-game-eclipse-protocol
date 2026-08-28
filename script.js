@@ -3,387 +3,1357 @@ const ctx = canvas.getContext("2d");
 
 const scoreElement = document.getElementById("score");
 const livesElement = document.getElementById("lives");
+
 const startScreen = document.getElementById("startScreen");
 const gameOverScreen = document.getElementById("gameOverScreen");
+
 const finalScore = document.getElementById("finalScore");
+
 const startButton = document.getElementById("startButton");
 const restartButton = document.getElementById("restartButton");
 
+
+// ============================================================
+// CONTROLES MOBILE
+// ============================================================
+
+const mobileControls = document.getElementById("mobileControls");
+
+const moveLeftButton = document.getElementById("moveLeftButton");
+const moveRightButton = document.getElementById("moveRightButton");
+const shootButton = document.getElementById("shootButton");
+
+
+// ============================================================
+// ESTADO DO JOGO
+// ============================================================
+
 let animationId;
+
 let running = false;
+
 let score = 0;
+
 let lives = 3;
+
 let lastTime = 0;
+
 let enemyTimer = 0;
+
 let shootTimer = 0;
 
+
+// ============================================================
+// TECLADO
+// ============================================================
+
 const keys = {};
+
+
+// ============================================================
+// PLAYER
+// ============================================================
 
 const player = {
   x: 0,
   y: 0,
+
   width: 42,
   height: 32,
+
   speed: 420
 };
 
+
+// ============================================================
+// OBJETOS DO JOGO
+// ============================================================
+
 let bullets = [];
+
 let enemies = [];
+
 let stars = [];
 
+
+// ============================================================
+// DETECÇÃO DE DISPOSITIVO TOUCH
+// ============================================================
+
+const isTouchDevice =
+  "ontouchstart" in window ||
+  navigator.maxTouchPoints > 0 ||
+  navigator.msMaxTouchPoints > 0;
+
+
+/*
+  Se o dispositivo possuir touch,
+  adicionamos uma classe ao body.
+
+  O CSS usa essa classe para mostrar
+  os controles na tela.
+*/
+
+if (isTouchDevice) {
+  document.body.classList.add("touch-device");
+}
+
+
+// ============================================================
+// RESIZE CANVAS
+// ============================================================
+
 function resizeCanvas() {
+
   const rect = canvas.getBoundingClientRect();
+
   const dpr = window.devicePixelRatio || 1;
 
+
   canvas.width = rect.width * dpr;
+
   canvas.height = rect.height * dpr;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+
+  ctx.setTransform(
+    dpr,
+    0,
+    0,
+    dpr,
+    0,
+    0
+  );
+
+
+  /*
+    Posiciona a nave próximo da parte inferior
+    da tela.
+  */
 
   player.y = rect.height - 65;
-  player.x = rect.width / 2 - player.width / 2;
+
+  player.x =
+    rect.width / 2 -
+    player.width / 2;
 }
+
+
+// ============================================================
+// CRIA ESTRELAS
+// ============================================================
 
 function createStars() {
+
   stars = [];
 
-  const rect = canvas.getBoundingClientRect();
+  const rect =
+    canvas.getBoundingClientRect();
+
 
   for (let i = 0; i < 100; i++) {
+
     stars.push({
-      x: Math.random() * rect.width,
-      y: Math.random() * rect.height,
-      size: Math.random() * 2 + 0.5,
-      speed: Math.random() * 40 + 20
+
+      x:
+        Math.random() *
+        rect.width,
+
+      y:
+        Math.random() *
+        rect.height,
+
+      size:
+        Math.random() * 2 + 0.5,
+
+      speed:
+        Math.random() * 40 + 20
+
     });
+
   }
 }
+
+
+// ============================================================
+// RESET GAME
+// ============================================================
 
 function resetGame() {
+
   score = 0;
+
   lives = 3;
+
   bullets = [];
+
   enemies = [];
 
-  scoreElement.textContent = score;
-  livesElement.textContent = lives;
+
+  scoreElement.textContent =
+    score;
+
+  livesElement.textContent =
+    lives;
+
 
   resizeCanvas();
+
   createStars();
+
+
+  /*
+    Limpa qualquer controle touch
+    que possa ter ficado pressionado.
+  */
+
+  keys["ArrowLeft"] = false;
+
+  keys["ArrowRight"] = false;
+
+  keys["a"] = false;
+
+  keys["d"] = false;
+
+  keys[" "] = false;
+
+
+  moveLeftButton.classList.remove("active");
+
+  moveRightButton.classList.remove("active");
+
+  shootButton.classList.remove("active");
 }
+
+
+// ============================================================
+// START GAME
+// ============================================================
 
 function startGame() {
+
   resetGame();
 
-  startScreen.classList.add("hidden");
-  gameOverScreen.classList.add("hidden");
+
+  startScreen.classList.add(
+    "hidden"
+  );
+
+  gameOverScreen.classList.add(
+    "hidden"
+  );
+
 
   running = true;
-  lastTime = performance.now();
 
-  cancelAnimationFrame(animationId);
-  animationId = requestAnimationFrame(gameLoop);
+  lastTime =
+    performance.now();
+
+
+  cancelAnimationFrame(
+    animationId
+  );
+
+
+  animationId =
+    requestAnimationFrame(
+      gameLoop
+    );
 }
+
+
+// ============================================================
+// GAME OVER
+// ============================================================
 
 function gameOver() {
+
   running = false;
 
-  finalScore.textContent = score;
-  gameOverScreen.classList.remove("hidden");
 
-  cancelAnimationFrame(animationId);
+  finalScore.textContent =
+    score;
+
+
+  gameOverScreen.classList.remove(
+    "hidden"
+  );
+
+
+  /*
+    Solta todos os controles.
+  */
+
+  keys["ArrowLeft"] = false;
+
+  keys["ArrowRight"] = false;
+
+  keys["a"] = false;
+
+  keys["d"] = false;
+
+  keys[" "] = false;
+
+
+  moveLeftButton.classList.remove(
+    "active"
+  );
+
+  moveRightButton.classList.remove(
+    "active"
+  );
+
+  shootButton.classList.remove(
+    "active"
+  );
+
+
+  cancelAnimationFrame(
+    animationId
+  );
 }
+
+
+// ============================================================
+// SHOOT
+// ============================================================
 
 function shoot() {
+
   if (!running) return;
 
+
   bullets.push({
-    x: player.x + player.width / 2 - 2,
-    y: player.y - 10,
+
+    x:
+      player.x +
+      player.width / 2 -
+      2,
+
+    y:
+      player.y - 10,
+
     width: 4,
+
     height: 14,
+
     speed: 650
+
   });
 }
+
+
+// ============================================================
+// CREATE ENEMY
+// ============================================================
 
 function createEnemy() {
-  const rect = canvas.getBoundingClientRect();
-  const size = Math.random() * 18 + 28;
+
+  const rect =
+    canvas.getBoundingClientRect();
+
+
+  const size =
+    Math.random() * 18 + 28;
+
 
   enemies.push({
-    x: Math.random() * (rect.width - size),
-    y: -size,
+
+    x:
+      Math.random() *
+      (rect.width - size),
+
+    y:
+      -size,
+
     width: size,
+
     height: size,
-    speed: Math.random() * 100 + 100,
-    rotation: Math.random() * Math.PI
+
+    speed:
+      Math.random() * 100 + 100,
+
+    rotation:
+      Math.random() * Math.PI
+
   });
 }
+
+
+// ============================================================
+// COLLISION
+// ============================================================
 
 function collision(a, b) {
+
   return (
-    a.x < b.x + b.width &&
-    a.x + a.width > b.x &&
-    a.y < b.y + b.height &&
-    a.y + a.height > b.y
+
+    a.x <
+      b.x + b.width &&
+
+    a.x + a.width >
+      b.x &&
+
+    a.y <
+      b.y + b.height &&
+
+    a.y + a.height >
+      b.y
+
   );
 }
 
+
+// ============================================================
+// UPDATE
+// ============================================================
+
 function update(delta) {
-  const rect = canvas.getBoundingClientRect();
 
-  // Movimento da nave
-  if (keys["ArrowLeft"] || keys["a"]) {
-    player.x -= player.speed * delta;
+  const rect =
+    canvas.getBoundingClientRect();
+
+
+  // ==========================================================
+  // MOVIMENTO DA NAVE
+  // ==========================================================
+
+  /*
+    Continua compatível com:
+
+    ArrowLeft
+    A
+
+    ArrowRight
+    D
+
+    E agora também:
+
+    Touch esquerda
+    Touch direita
+  */
+
+  if (
+    keys["ArrowLeft"] ||
+    keys["a"]
+  ) {
+
+    player.x -=
+      player.speed * delta;
+
   }
 
-  if (keys["ArrowRight"] || keys["d"]) {
-    player.x += player.speed * delta;
+
+  if (
+    keys["ArrowRight"] ||
+    keys["d"]
+  ) {
+
+    player.x +=
+      player.speed * delta;
+
   }
+
+
+  /*
+    Impede a nave de sair da tela.
+  */
 
   player.x = Math.max(
+
     0,
-    Math.min(rect.width - player.width, player.x)
+
+    Math.min(
+      rect.width -
+      player.width,
+
+      player.x
+    )
+
   );
 
-  // Tiro automático enquanto espaço estiver pressionado
+
+  // ==========================================================
+  // TIRO AUTOMÁTICO
+  // ==========================================================
+
   shootTimer -= delta;
 
-  if (keys[" "] && shootTimer <= 0) {
+
+  /*
+    Tanto o ESPAÇO do computador
+    quanto o botão touch utilizam
+    keys[" "].
+  */
+
+  if (
+    keys[" "] &&
+    shootTimer <= 0
+  ) {
+
     shoot();
+
     shootTimer = 0.22;
+
   }
 
-  // Balas
-  bullets.forEach(bullet => {
-    bullet.y -= bullet.speed * delta;
-  });
 
-  bullets = bullets.filter(bullet => bullet.y > -30);
+  // ==========================================================
+  // BALAS
+  // ==========================================================
 
-  // Inimigos
+  bullets.forEach(
+    bullet => {
+
+      bullet.y -=
+        bullet.speed * delta;
+
+    }
+  );
+
+
+  bullets =
+    bullets.filter(
+      bullet =>
+        bullet.y > -30
+    );
+
+
+  // ==========================================================
+  // INIMIGOS
+  // ==========================================================
+
   enemyTimer -= delta;
 
+
   if (enemyTimer <= 0) {
+
     createEnemy();
 
-    const difficulty = Math.min(score / 500, 0.5);
-    enemyTimer = Math.max(0.25, 0.8 - difficulty);
+
+    const difficulty =
+      Math.min(
+        score / 500,
+        0.5
+      );
+
+
+    enemyTimer =
+      Math.max(
+        0.25,
+        0.8 - difficulty
+      );
+
   }
 
-  enemies.forEach(enemy => {
-    enemy.y += enemy.speed * delta;
-    enemy.rotation += delta;
-  });
 
-  // Colisão bala x inimigo
-  for (let i = enemies.length - 1; i >= 0; i--) {
+  enemies.forEach(
+    enemy => {
+
+      enemy.y +=
+        enemy.speed * delta;
+
+      enemy.rotation +=
+        delta;
+
+    }
+  );
+
+
+  // ==========================================================
+  // COLISÃO BALA X INIMIGO
+  // ==========================================================
+
+  for (
+    let i = enemies.length - 1;
+    i >= 0;
+    i--
+  ) {
+
     let destroyed = false;
 
-    for (let j = bullets.length - 1; j >= 0; j--) {
-      if (collision(enemies[i], bullets[j])) {
-        enemies.splice(i, 1);
-        bullets.splice(j, 1);
+
+    for (
+      let j = bullets.length - 1;
+      j >= 0;
+      j--
+    ) {
+
+      if (
+        collision(
+          enemies[i],
+          bullets[j]
+        )
+      ) {
+
+        enemies.splice(
+          i,
+          1
+        );
+
+        bullets.splice(
+          j,
+          1
+        );
+
 
         score += 10;
-        scoreElement.textContent = score;
+
+
+        scoreElement.textContent =
+          score;
+
 
         destroyed = true;
+
+
         break;
+
       }
+
     }
+
 
     if (destroyed) continue;
 
-    // Inimigo atingiu a nave
-    if (collision(enemies[i], player)) {
-      enemies.splice(i, 1);
+
+    // ========================================================
+    // INIMIGO ATINGIU A NAVE
+    // ========================================================
+
+    if (
+      collision(
+        enemies[i],
+        player
+      )
+    ) {
+
+      enemies.splice(
+        i,
+        1
+      );
+
+
       lives--;
-      livesElement.textContent = lives;
+
+
+      livesElement.textContent =
+        lives;
+
 
       if (lives <= 0) {
+
         gameOver();
+
         return;
+
       }
+
     }
+
   }
 
-  // Inimigos que passaram
-  for (let i = enemies.length - 1; i >= 0; i--) {
-    if (enemies[i].y > rect.height) {
-      enemies.splice(i, 1);
+
+  // ==========================================================
+  // INIMIGOS QUE PASSARAM
+  // ==========================================================
+
+  for (
+    let i = enemies.length - 1;
+    i >= 0;
+    i--
+  ) {
+
+    if (
+      enemies[i].y >
+      rect.height
+    ) {
+
+      enemies.splice(
+        i,
+        1
+      );
+
+
       lives--;
 
-      livesElement.textContent = lives;
+
+      livesElement.textContent =
+        lives;
+
 
       if (lives <= 0) {
+
         gameOver();
+
         return;
+
       }
+
     }
+
   }
 
-  // Estrelas
-  stars.forEach(star => {
-    star.y += star.speed * delta;
 
-    if (star.y > rect.height) {
-      star.y = 0;
-      star.x = Math.random() * rect.width;
+  // ==========================================================
+  // ESTRELAS
+  // ==========================================================
+
+  stars.forEach(
+    star => {
+
+      star.y +=
+        star.speed * delta;
+
+
+      if (
+        star.y >
+        rect.height
+      ) {
+
+        star.y = 0;
+
+
+        star.x =
+          Math.random() *
+          rect.width;
+
+      }
+
     }
-  });
+  );
 }
 
+
+// ============================================================
+// DRAW BACKGROUND
+// ============================================================
+
 function drawBackground() {
-  const rect = canvas.getBoundingClientRect();
 
-  ctx.fillStyle = "#020205";
-  ctx.fillRect(0, 0, rect.width, rect.height);
+  const rect =
+    canvas.getBoundingClientRect();
 
-  stars.forEach(star => {
-    ctx.fillStyle = "#ffffff";
-    ctx.globalAlpha = Math.random() * 0.6 + 0.3;
-    ctx.fillRect(star.x, star.y, star.size, star.size);
-  });
+
+  ctx.fillStyle =
+    "#020205";
+
+
+  ctx.fillRect(
+    0,
+    0,
+    rect.width,
+    rect.height
+  );
+
+
+  stars.forEach(
+    star => {
+
+      ctx.fillStyle =
+        "#ffffff";
+
+
+      ctx.globalAlpha =
+        Math.random() *
+        0.6 +
+        0.3;
+
+
+      ctx.fillRect(
+        star.x,
+        star.y,
+        star.size,
+        star.size
+      );
+
+    }
+  );
+
 
   ctx.globalAlpha = 1;
 }
 
+
+// ============================================================
+// DRAW PLAYER
+// ============================================================
+
 function drawPlayer() {
-  const x = player.x;
-  const y = player.y;
+
+  const x =
+    player.x;
+
+  const y =
+    player.y;
+
 
   ctx.save();
 
-  ctx.shadowBlur = 20;
-  ctx.shadowColor = "#ff1493";
 
-  ctx.fillStyle = "#ff1493";
+  ctx.shadowBlur =
+    20;
 
-  ctx.beginPath();
-  ctx.moveTo(x + player.width / 2, y);
-  ctx.lineTo(x + player.width, y + player.height);
-  ctx.lineTo(x + player.width / 2, y + player.height - 8);
-  ctx.lineTo(x, y + player.height);
-  ctx.closePath();
-  ctx.fill();
+  ctx.shadowColor =
+    "#ff1493";
 
-  ctx.fillStyle = "#ffffff";
+
+  ctx.fillStyle =
+    "#ff1493";
+
 
   ctx.beginPath();
-  ctx.moveTo(x + player.width / 2, y + 8);
-  ctx.lineTo(x + player.width / 2 + 7, y + 20);
-  ctx.lineTo(x + player.width / 2 - 7, y + 20);
+
+
+  ctx.moveTo(
+    x +
+      player.width / 2,
+    y
+  );
+
+
+  ctx.lineTo(
+    x +
+      player.width,
+    y +
+      player.height
+  );
+
+
+  ctx.lineTo(
+    x +
+      player.width / 2,
+    y +
+      player.height -
+      8
+  );
+
+
+  ctx.lineTo(
+    x,
+    y +
+      player.height
+  );
+
+
   ctx.closePath();
+
+
   ctx.fill();
+
+
+  ctx.fillStyle =
+    "#ffffff";
+
+
+  ctx.beginPath();
+
+
+  ctx.moveTo(
+    x +
+      player.width / 2,
+    y + 8
+  );
+
+
+  ctx.lineTo(
+    x +
+      player.width / 2 +
+      7,
+    y + 20
+  );
+
+
+  ctx.lineTo(
+    x +
+      player.width / 2 -
+      7,
+    y + 20
+  );
+
+
+  ctx.closePath();
+
+
+  ctx.fill();
+
 
   ctx.restore();
 }
 
+
+// ============================================================
+// DRAW BULLETS
+// ============================================================
+
 function drawBullets() {
-  bullets.forEach(bullet => {
-    ctx.save();
 
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = "#ffffff";
+  bullets.forEach(
+    bullet => {
 
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(
-      bullet.x,
-      bullet.y,
-      bullet.width,
-      bullet.height
-    );
+      ctx.save();
 
-    ctx.restore();
-  });
+
+      ctx.shadowBlur =
+        15;
+
+      ctx.shadowColor =
+        "#ffffff";
+
+
+      ctx.fillStyle =
+        "#ffffff";
+
+
+      ctx.fillRect(
+
+        bullet.x,
+
+        bullet.y,
+
+        bullet.width,
+
+        bullet.height
+
+      );
+
+
+      ctx.restore();
+
+    }
+  );
 }
+
+
+// ============================================================
+// DRAW ENEMIES
+// ============================================================
 
 function drawEnemies() {
-  enemies.forEach(enemy => {
-    ctx.save();
 
-    ctx.translate(
-      enemy.x + enemy.width / 2,
-      enemy.y + enemy.height / 2
-    );
+  enemies.forEach(
+    enemy => {
 
-    ctx.rotate(enemy.rotation);
+      ctx.save();
 
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = "#ff1493";
 
-    ctx.strokeStyle = "#ff1493";
-    ctx.lineWidth = 3;
+      ctx.translate(
 
-    ctx.strokeRect(
-      -enemy.width / 2,
-      -enemy.height / 2,
-      enemy.width,
-      enemy.height
-    );
+        enemy.x +
+          enemy.width / 2,
 
-    ctx.strokeStyle = "#ffffff";
-    ctx.lineWidth = 2;
+        enemy.y +
+          enemy.height / 2
 
-    ctx.beginPath();
-    ctx.moveTo(-enemy.width / 2, 0);
-    ctx.lineTo(enemy.width / 2, 0);
-    ctx.moveTo(0, -enemy.height / 2);
-    ctx.lineTo(0, enemy.height / 2);
-    ctx.stroke();
+      );
 
-    ctx.restore();
-  });
+
+      ctx.rotate(
+        enemy.rotation
+      );
+
+
+      ctx.shadowBlur =
+        15;
+
+      ctx.shadowColor =
+        "#ff1493";
+
+
+      ctx.strokeStyle =
+        "#ff1493";
+
+      ctx.lineWidth = 3;
+
+
+      ctx.strokeRect(
+
+        -enemy.width / 2,
+
+        -enemy.height / 2,
+
+        enemy.width,
+
+        enemy.height
+
+      );
+
+
+      ctx.strokeStyle =
+        "#ffffff";
+
+      ctx.lineWidth = 2;
+
+
+      ctx.beginPath();
+
+
+      ctx.moveTo(
+        -enemy.width / 2,
+        0
+      );
+
+
+      ctx.lineTo(
+        enemy.width / 2,
+        0
+      );
+
+
+      ctx.moveTo(
+        0,
+        -enemy.height / 2
+      );
+
+
+      ctx.lineTo(
+        0,
+        enemy.height / 2
+      );
+
+
+      ctx.stroke();
+
+
+      ctx.restore();
+
+    }
+  );
 }
+
+
+// ============================================================
+// DRAW
+// ============================================================
 
 function draw() {
+
   drawBackground();
+
   drawBullets();
+
   drawEnemies();
+
   drawPlayer();
+
 }
+
+
+// ============================================================
+// GAME LOOP
+// ============================================================
 
 function gameLoop(timestamp) {
+
   if (!running) return;
 
-  const delta = Math.min((timestamp - lastTime) / 1000, 0.05);
-  lastTime = timestamp;
+
+  const delta =
+    Math.min(
+      (timestamp - lastTime) / 1000,
+      0.05
+    );
+
+
+  lastTime =
+    timestamp;
+
 
   update(delta);
+
   draw();
 
-  animationId = requestAnimationFrame(gameLoop);
+
+  animationId =
+    requestAnimationFrame(
+      gameLoop
+    );
 }
 
-window.addEventListener("keydown", event => {
-  keys[event.key] = true;
 
-  if (event.key === " ") {
-    event.preventDefault();
+// ============================================================
+// TECLADO - KEYDOWN
+// ============================================================
+
+window.addEventListener(
+  "keydown",
+  event => {
+
+    keys[event.key] = true;
+
+
+    /*
+      Impede o navegador de interpretar
+      o espaço como scroll.
+    */
+
+    if (event.key === " ") {
+
+      event.preventDefault();
+
+    }
+
+
+    /*
+      Permite iniciar o jogo com:
+
+      ESPAÇO
+      ENTER
+    */
+
+    if (
+
+      (
+        event.key === " " ||
+        event.key === "Enter"
+      ) &&
+
+      !running &&
+
+      startScreen.classList.contains(
+        "hidden"
+      ) === false
+
+    ) {
+
+      startGame();
+
+    }
+
   }
+);
 
-  if (
-    (event.key === " " || event.key === "Enter") &&
-    !running &&
-    startScreen.classList.contains("hidden") === false
-  ) {
-    startGame();
+
+// ============================================================
+// TECLADO - KEYUP
+// ============================================================
+
+window.addEventListener(
+  "keyup",
+  event => {
+
+    keys[event.key] = false;
+
   }
-});
+);
 
-window.addEventListener("keyup", event => {
-  keys[event.key] = false;
-});
 
-startButton.addEventListener("click", startGame);
-restartButton.addEventListener("click", startGame);
+// ============================================================
+// CONTROLES TOUCH
+// ============================================================
 
-window.addEventListener("resize", () => {
-  if (running) {
-    resizeCanvas();
+/*
+  Função genérica para configurar
+  um botão touch.
+
+  pointerdown:
+  começa o movimento/tiro.
+
+  pointerup:
+  para o movimento/tiro.
+
+  pointercancel:
+  também para caso o sistema operacional
+  interrompa o toque.
+*/
+
+function setupTouchButton(
+  button,
+  key
+) {
+
+  button.addEventListener(
+    "pointerdown",
+    event => {
+
+      event.preventDefault();
+
+      keys[key] = true;
+
+      button.classList.add(
+        "active"
+      );
+
+
+      /*
+        Captura o ponteiro para garantir
+        que o botão continue recebendo
+        pointerup mesmo se o dedo sair
+        um pouco da área do botão.
+      */
+
+      if (
+        button.setPointerCapture
+      ) {
+
+        try {
+
+          button.setPointerCapture(
+            event.pointerId
+          );
+
+        } catch (error) {
+
+          // Ignora caso o navegador não suporte.
+
+        }
+
+      }
+
+    }
+  );
+
+
+  button.addEventListener(
+    "pointerup",
+    event => {
+
+      event.preventDefault();
+
+      keys[key] = false;
+
+      button.classList.remove(
+        "active"
+      );
+
+    }
+  );
+
+
+  button.addEventListener(
+    "pointercancel",
+    event => {
+
+      event.preventDefault();
+
+      keys[key] = false;
+
+      button.classList.remove(
+        "active"
+      );
+
+    }
+  );
+
+
+  button.addEventListener(
+    "lostpointercapture",
+    () => {
+
+      keys[key] = false;
+
+      button.classList.remove(
+        "active"
+      );
+
+    }
+  );
+
+
+  /*
+    Evita que o navegador execute
+    ações inesperadas ao tocar.
+  */
+
+  button.addEventListener(
+    "contextmenu",
+    event => {
+
+      event.preventDefault();
+
+    }
+  );
+
+}
+
+
+// ============================================================
+// CONFIGURA OS 3 CONTROLES
+// ============================================================
+
+setupTouchButton(
+  moveLeftButton,
+  "ArrowLeft"
+);
+
+
+setupTouchButton(
+  moveRightButton,
+  "ArrowRight"
+);
+
+
+setupTouchButton(
+  shootButton,
+  " "
+);
+
+
+// ============================================================
+// BOTÕES START / RESTART
+// ============================================================
+
+startButton.addEventListener(
+  "click",
+  startGame
+);
+
+
+restartButton.addEventListener(
+  "click",
+  startGame
+);
+
+
+// ============================================================
+// RESIZE
+// ============================================================
+
+window.addEventListener(
+  "resize",
+  () => {
+
+    if (running) {
+
+      resizeCanvas();
+
+    }
+
   }
-});
+);
+
+
+// ============================================================
+// ORIENTAÇÃO DO CELULAR
+// ============================================================
+
+/*
+  Quando o usuário gira o celular,
+  recalculamos o tamanho do canvas.
+*/
+
+window.addEventListener(
+  "orientationchange",
+  () => {
+
+    setTimeout(
+      () => {
+
+        resizeCanvas();
+
+      },
+      100
+    );
+
+  }
+);
+
+
+// ============================================================
+// INICIALIZAÇÃO
+// ============================================================
 
 resizeCanvas();
+
 createStars();
+
 draw();
