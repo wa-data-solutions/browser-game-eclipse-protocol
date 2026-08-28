@@ -17,11 +17,17 @@ const restartButton = document.getElementById("restartButton");
 // CONTROLES MOBILE
 // ============================================================
 
-const mobileControls = document.getElementById("mobileControls");
+const mobileControls =
+  document.getElementById("mobileControls");
 
-const moveLeftButton = document.getElementById("moveLeftButton");
-const moveRightButton = document.getElementById("moveRightButton");
-const shootButton = document.getElementById("shootButton");
+const moveLeftButton =
+  document.getElementById("moveLeftButton");
+
+const moveRightButton =
+  document.getElementById("moveRightButton");
+
+const shootButton =
+  document.getElementById("shootButton");
 
 
 // ============================================================
@@ -55,18 +61,22 @@ const keys = {};
 // ============================================================
 
 const player = {
+
   x: 0,
+
   y: 0,
 
   width: 42,
+
   height: 32,
 
   speed: 420
+
 };
 
 
 // ============================================================
-// OBJETOS DO JOGO
+// OBJETOS
 // ============================================================
 
 let bullets = [];
@@ -77,7 +87,7 @@ let stars = [];
 
 
 // ============================================================
-// DETECÇÃO DE DISPOSITIVO TOUCH
+// DETECÇÃO DE TOUCH
 // ============================================================
 
 const isTouchDevice =
@@ -87,15 +97,19 @@ const isTouchDevice =
 
 
 /*
-  Se o dispositivo possuir touch,
-  adicionamos uma classe ao body.
+  Se for um dispositivo touch,
+  adicionamos a classe ao body.
 
-  O CSS usa essa classe para mostrar
-  os controles na tela.
+  O CSS utiliza essa classe para
+  mostrar os controles.
 */
 
 if (isTouchDevice) {
-  document.body.classList.add("touch-device");
+
+  document.body.classList.add(
+    "touch-device"
+  );
+
 }
 
 
@@ -105,41 +119,50 @@ if (isTouchDevice) {
 
 function resizeCanvas() {
 
-  const rect = canvas.getBoundingClientRect();
+  const rect =
+    canvas.getBoundingClientRect();
 
-  const dpr = window.devicePixelRatio || 1;
+  const dpr =
+    window.devicePixelRatio || 1;
 
 
-  canvas.width = rect.width * dpr;
+  canvas.width =
+    rect.width * dpr;
 
-  canvas.height = rect.height * dpr;
+  canvas.height =
+    rect.height * dpr;
 
 
   ctx.setTransform(
+
     dpr,
     0,
     0,
     dpr,
     0,
     0
+
   );
 
 
   /*
-    Posiciona a nave próximo da parte inferior
-    da tela.
+    Posiciona a nave próximo
+    à parte inferior do jogo.
   */
 
-  player.y = rect.height - 65;
+  player.y =
+    rect.height - 65;
+
 
   player.x =
     rect.width / 2 -
     player.width / 2;
+
 }
 
 
 // ============================================================
-// CRIA ESTRELAS
+// ESTRELAS
 // ============================================================
 
 function createStars() {
@@ -150,7 +173,11 @@ function createStars() {
     canvas.getBoundingClientRect();
 
 
-  for (let i = 0; i < 100; i++) {
+  for (
+    let i = 0;
+    i < 100;
+    i++
+  ) {
 
     stars.push({
 
@@ -163,14 +190,17 @@ function createStars() {
         rect.height,
 
       size:
-        Math.random() * 2 + 0.5,
+        Math.random() * 2 +
+        0.5,
 
       speed:
-        Math.random() * 40 + 20
+        Math.random() * 40 +
+        20
 
     });
 
   }
+
 }
 
 
@@ -202,8 +232,7 @@ function resetGame() {
 
 
   /*
-    Limpa qualquer controle touch
-    que possa ter ficado pressionado.
+    Limpa os controles.
   */
 
   keys["ArrowLeft"] = false;
@@ -217,11 +246,18 @@ function resetGame() {
   keys[" "] = false;
 
 
-  moveLeftButton.classList.remove("active");
+  moveLeftButton.classList.remove(
+    "active"
+  );
 
-  moveRightButton.classList.remove("active");
+  moveRightButton.classList.remove(
+    "active"
+  );
 
-  shootButton.classList.remove("active");
+  shootButton.classList.remove(
+    "active"
+  );
+
 }
 
 
@@ -258,6 +294,7 @@ function startGame() {
     requestAnimationFrame(
       gameLoop
     );
+
 }
 
 
@@ -310,6 +347,7 @@ function gameOver() {
   cancelAnimationFrame(
     animationId
   );
+
 }
 
 
@@ -339,6 +377,7 @@ function shoot() {
     speed: 650
 
   });
+
 }
 
 
@@ -353,7 +392,8 @@ function createEnemy() {
 
 
   const size =
-    Math.random() * 18 + 28;
+    Math.random() * 18 +
+    28;
 
 
   enemies.push({
@@ -370,12 +410,15 @@ function createEnemy() {
     height: size,
 
     speed:
-      Math.random() * 100 + 100,
+      Math.random() * 100 +
+      100,
 
     rotation:
-      Math.random() * Math.PI
+      Math.random() *
+      Math.PI
 
   });
+
 }
 
 
@@ -400,6 +443,7 @@ function collision(a, b) {
       b.y
 
   );
+
 }
 
 
@@ -418,23 +462,25 @@ function update(delta) {
   // ==========================================================
 
   /*
-    Continua compatível com:
+    COMPUTADOR:
 
     ArrowLeft
-    A
-
     ArrowRight
+    A
     D
 
-    E agora também:
+    CELULAR:
 
-    Touch esquerda
-    Touch direita
+    Os botões touch ativam
+    ArrowLeft / ArrowRight.
   */
 
+
   if (
+
     keys["ArrowLeft"] ||
     keys["a"]
+
   ) {
 
     player.x -=
@@ -444,8 +490,10 @@ function update(delta) {
 
 
   if (
+
     keys["ArrowRight"] ||
     keys["d"]
+
   ) {
 
     player.x +=
@@ -455,7 +503,8 @@ function update(delta) {
 
 
   /*
-    Impede a nave de sair da tela.
+    Impede a nave de sair
+    da tela.
   */
 
   player.x = Math.max(
@@ -463,31 +512,37 @@ function update(delta) {
     0,
 
     Math.min(
+
       rect.width -
       player.width,
 
       player.x
+
     )
 
   );
 
 
   // ==========================================================
-  // TIRO AUTOMÁTICO
+  // TIRO
   // ==========================================================
 
   shootTimer -= delta;
 
 
   /*
-    Tanto o ESPAÇO do computador
-    quanto o botão touch utilizam
-    keys[" "].
+    O mesmo sistema funciona para:
+
+    ESPAÇO no computador
+
+    BOTÃO DE TIRO no celular
   */
 
   if (
+
     keys[" "] &&
     shootTimer <= 0
+
   ) {
 
     shoot();
@@ -564,8 +619,11 @@ function update(delta) {
   // ==========================================================
 
   for (
-    let i = enemies.length - 1;
+    let i =
+      enemies.length - 1;
+
     i >= 0;
+
     i--
   ) {
 
@@ -573,8 +631,11 @@ function update(delta) {
 
 
     for (
-      let j = bullets.length - 1;
+      let j =
+        bullets.length - 1;
+
       j >= 0;
+
       j--
     ) {
 
@@ -613,7 +674,9 @@ function update(delta) {
     }
 
 
-    if (destroyed) continue;
+    if (destroyed) {
+      continue;
+    }
 
 
     // ========================================================
@@ -658,8 +721,11 @@ function update(delta) {
   // ==========================================================
 
   for (
-    let i = enemies.length - 1;
+    let i =
+      enemies.length - 1;
+
     i >= 0;
+
     i--
   ) {
 
@@ -721,6 +787,7 @@ function update(delta) {
 
     }
   );
+
 }
 
 
@@ -739,10 +806,13 @@ function drawBackground() {
 
 
   ctx.fillRect(
+
     0,
     0,
+
     rect.width,
     rect.height
+
   );
 
 
@@ -760,10 +830,13 @@ function drawBackground() {
 
 
       ctx.fillRect(
+
         star.x,
         star.y,
+
         star.size,
         star.size
+
       );
 
     }
@@ -771,6 +844,7 @@ function drawBackground() {
 
 
   ctx.globalAlpha = 1;
+
 }
 
 
@@ -805,33 +879,45 @@ function drawPlayer() {
 
 
   ctx.moveTo(
+
     x +
-      player.width / 2,
+    player.width / 2,
+
     y
+
   );
 
 
   ctx.lineTo(
+
     x +
-      player.width,
+    player.width,
+
     y +
-      player.height
+    player.height
+
   );
 
 
   ctx.lineTo(
+
     x +
-      player.width / 2,
+    player.width / 2,
+
     y +
-      player.height -
-      8
+    player.height -
+    8
+
   );
 
 
   ctx.lineTo(
+
     x,
+
     y +
-      player.height
+    player.height
+
   );
 
 
@@ -849,25 +935,34 @@ function drawPlayer() {
 
 
   ctx.moveTo(
+
     x +
-      player.width / 2,
+    player.width / 2,
+
     y + 8
+
   );
 
 
   ctx.lineTo(
+
     x +
-      player.width / 2 +
-      7,
+    player.width / 2 +
+    7,
+
     y + 20
+
   );
 
 
   ctx.lineTo(
+
     x +
-      player.width / 2 -
-      7,
+    player.width / 2 -
+    7,
+
     y + 20
+
   );
 
 
@@ -878,6 +973,7 @@ function drawPlayer() {
 
 
   ctx.restore();
+
 }
 
 
@@ -921,6 +1017,7 @@ function drawBullets() {
 
     }
   );
+
 }
 
 
@@ -939,10 +1036,10 @@ function drawEnemies() {
       ctx.translate(
 
         enemy.x +
-          enemy.width / 2,
+        enemy.width / 2,
 
         enemy.y +
-          enemy.height / 2
+        enemy.height / 2
 
       );
 
@@ -988,26 +1085,38 @@ function drawEnemies() {
 
 
       ctx.moveTo(
+
         -enemy.width / 2,
+
         0
+
       );
 
 
       ctx.lineTo(
+
         enemy.width / 2,
+
         0
+
       );
 
 
       ctx.moveTo(
+
         0,
+
         -enemy.height / 2
+
       );
 
 
       ctx.lineTo(
+
         0,
+
         enemy.height / 2
+
       );
 
 
@@ -1018,6 +1127,7 @@ function drawEnemies() {
 
     }
   );
+
 }
 
 
@@ -1044,13 +1154,19 @@ function draw() {
 
 function gameLoop(timestamp) {
 
-  if (!running) return;
+  if (!running) {
+    return;
+  }
 
 
   const delta =
     Math.min(
-      (timestamp - lastTime) / 1000,
+
+      (timestamp - lastTime) /
+      1000,
+
       0.05
+
     );
 
 
@@ -1067,11 +1183,12 @@ function gameLoop(timestamp) {
     requestAnimationFrame(
       gameLoop
     );
+
 }
 
 
 // ============================================================
-// TECLADO - KEYDOWN
+// KEYBOARD - KEYDOWN
 // ============================================================
 
 window.addEventListener(
@@ -1082,8 +1199,8 @@ window.addEventListener(
 
 
     /*
-      Impede o navegador de interpretar
-      o espaço como scroll.
+      Impede o espaço de
+      fazer scroll na página.
     */
 
     if (event.key === " ") {
@@ -1094,7 +1211,7 @@ window.addEventListener(
 
 
     /*
-      Permite iniciar o jogo com:
+      Inicia o jogo usando:
 
       ESPAÇO
       ENTER
@@ -1124,7 +1241,7 @@ window.addEventListener(
 
 
 // ============================================================
-// TECLADO - KEYUP
+// KEYBOARD - KEYUP
 // ============================================================
 
 window.addEventListener(
@@ -1138,22 +1255,16 @@ window.addEventListener(
 
 
 // ============================================================
-// CONTROLES TOUCH
+// TOUCH CONTROLS
 // ============================================================
 
 /*
-  Função genérica para configurar
-  um botão touch.
+  Configura um botão touch.
 
-  pointerdown:
-  começa o movimento/tiro.
+  Enquanto o usuário mantém o dedo
+  pressionado, a tecla permanece ativa.
 
-  pointerup:
-  para o movimento/tiro.
-
-  pointercancel:
-  também para caso o sistema operacional
-  interrompa o toque.
+  Quando solta, a tecla é liberada.
 */
 
 function setupTouchButton(
@@ -1161,13 +1272,20 @@ function setupTouchButton(
   key
 ) {
 
+
+  // ----------------------------------------------------------
+  // TOUCH / POINTER DOWN
+  // ----------------------------------------------------------
+
   button.addEventListener(
     "pointerdown",
     event => {
 
       event.preventDefault();
 
+
       keys[key] = true;
+
 
       button.classList.add(
         "active"
@@ -1175,10 +1293,12 @@ function setupTouchButton(
 
 
       /*
-        Captura o ponteiro para garantir
-        que o botão continue recebendo
-        pointerup mesmo se o dedo sair
-        um pouco da área do botão.
+        Captura o ponteiro.
+
+        Isso melhora bastante a experiência
+        em celulares, pois mesmo que o dedo
+        saia alguns pixels do botão,
+        conseguimos detectar o lançamento.
       */
 
       if (
@@ -1193,7 +1313,7 @@ function setupTouchButton(
 
         } catch (error) {
 
-          // Ignora caso o navegador não suporte.
+          // Navegador sem suporte completo.
 
         }
 
@@ -1203,13 +1323,19 @@ function setupTouchButton(
   );
 
 
+  // ----------------------------------------------------------
+  // POINTER UP
+  // ----------------------------------------------------------
+
   button.addEventListener(
     "pointerup",
     event => {
 
       event.preventDefault();
 
+
       keys[key] = false;
+
 
       button.classList.remove(
         "active"
@@ -1218,6 +1344,10 @@ function setupTouchButton(
     }
   );
 
+
+  // ----------------------------------------------------------
+  // POINTER CANCEL
+  // ----------------------------------------------------------
 
   button.addEventListener(
     "pointercancel",
@@ -1225,7 +1355,9 @@ function setupTouchButton(
 
       event.preventDefault();
 
+
       keys[key] = false;
+
 
       button.classList.remove(
         "active"
@@ -1234,6 +1366,10 @@ function setupTouchButton(
     }
   );
 
+
+  // ----------------------------------------------------------
+  // LOST POINTER CAPTURE
+  // ----------------------------------------------------------
 
   button.addEventListener(
     "lostpointercapture",
@@ -1241,6 +1377,7 @@ function setupTouchButton(
 
       keys[key] = false;
 
+
       button.classList.remove(
         "active"
       );
@@ -1249,10 +1386,9 @@ function setupTouchButton(
   );
 
 
-  /*
-    Evita que o navegador execute
-    ações inesperadas ao tocar.
-  */
+  // ----------------------------------------------------------
+  // CONTEXT MENU
+  // ----------------------------------------------------------
 
   button.addEventListener(
     "contextmenu",
@@ -1267,8 +1403,12 @@ function setupTouchButton(
 
 
 // ============================================================
-// CONFIGURA OS 3 CONTROLES
+// CONFIGURA OS CONTROLES
 // ============================================================
+
+/*
+  ESQUERDA
+*/
 
 setupTouchButton(
   moveLeftButton,
@@ -1276,11 +1416,22 @@ setupTouchButton(
 );
 
 
+/*
+  DIREITA
+*/
+
 setupTouchButton(
   moveRightButton,
   "ArrowRight"
 );
 
+
+/*
+  TIRO
+
+  Utiliza a mesma "tecla"
+  do espaço do computador.
+*/
 
 setupTouchButton(
   shootButton,
@@ -1289,7 +1440,7 @@ setupTouchButton(
 
 
 // ============================================================
-// BOTÕES START / RESTART
+// START / RESTART
 // ============================================================
 
 startButton.addEventListener(
@@ -1323,13 +1474,8 @@ window.addEventListener(
 
 
 // ============================================================
-// ORIENTAÇÃO DO CELULAR
+// ORIENTATION CHANGE
 // ============================================================
-
-/*
-  Quando o usuário gira o celular,
-  recalculamos o tamanho do canvas.
-*/
 
 window.addEventListener(
   "orientationchange",

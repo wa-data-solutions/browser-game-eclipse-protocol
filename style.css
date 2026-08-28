@@ -1,5 +1,10 @@
+/* ============================================================
+   RESET
+   ============================================================ */
+
 * {
   box-sizing: border-box;
+
   margin: 0;
   padding: 0;
 }
@@ -28,19 +33,24 @@ body {
 
   overflow: hidden;
 
-  /* Evita gestos do navegador durante o jogo */
+  /*
+    Impede gestos do navegador
+    durante o jogo.
+  */
+
   touch-action: none;
 }
 
 
 /* ============================================================
-   ÁREA PRINCIPAL DO JOGO
+   GAME WRAPPER
    ============================================================ */
 
 .game-wrapper {
   position: relative;
 
   width: min(95vw, 800px);
+
   height: min(90vh, 700px);
 
   border: 2px solid #ff1493;
@@ -87,6 +97,7 @@ canvas {
   z-index: 5;
 
   top: 15px;
+
   left: 20px;
   right: 20px;
 
@@ -110,7 +121,7 @@ canvas {
 
 
 /* ============================================================
-   TELAS / OVERLAYS
+   OVERLAYS
    ============================================================ */
 
 .overlay {
@@ -175,7 +186,7 @@ canvas {
 
 
 /* ============================================================
-   BOTÕES
+   BOTÕES NORMAIS
    ============================================================ */
 
 button {
@@ -230,12 +241,8 @@ button:active {
 
 
 /* ============================================================
-   INFORMAÇÕES DE CONTROLE MOBILE
+   INFORMAÇÕES MOBILE
    ============================================================ */
-
-/*
-  Por padrão, essa mensagem não aparece.
-*/
 
 .mobile-controls-info {
   display: none;
@@ -243,15 +250,8 @@ button:active {
 
 
 /* ============================================================
-   CONTROLES TOUCH
+   CONTROLES MOBILE
    ============================================================ */
-
-/*
-  Por padrão os controles mobile ficam escondidos.
-
-  O JavaScript detecta dispositivos touch e adiciona
-  a classe "touch-device" no body.
-*/
 
 .mobile-controls {
   position: absolute;
@@ -260,16 +260,30 @@ button:active {
 
   left: 0;
   right: 0;
-  bottom: 20px;
+
+  /*
+    Os controles ficam na parte inferior
+    da área do jogo.
+  */
+
+  bottom: 18px;
 
   display: none;
 
-  justify-content: space-between;
-
   align-items: center;
 
-  padding:
-    0 20px;
+  justify-content: space-between;
+
+  /*
+    Espaçamento lateral.
+  */
+
+  padding-left: 18px;
+  padding-right: 18px;
+
+  /*
+    Não bloqueia o restante do canvas.
+  */
 
   pointer-events: none;
 
@@ -277,15 +291,35 @@ button:active {
 }
 
 
+/* ============================================================
+   CONTROLES DE MOVIMENTO
+   ============================================================ */
+
 /*
-  Cada botão touch
+  Esquerda e direita ficam agrupados,
+  como um D-Pad de controle.
 */
+
+.movement-controls {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  pointer-events: none;
+}
+
+
+/* ============================================================
+   BOTÕES TOUCH
+   ============================================================ */
 
 .touch-button {
   pointer-events: auto;
 
-  width: 72px;
-  height: 72px;
+  width: 68px;
+  height: 68px;
 
   padding: 0;
 
@@ -296,20 +330,20 @@ button:active {
   align-items: center;
   justify-content: center;
 
-  font-size: 27px;
+  font-size: 25px;
 
   letter-spacing: 0;
 
   color: #ff1493;
 
   background:
-    rgba(5, 5, 9, .72);
+    rgba(5, 5, 9, .78);
 
   border:
-    2px solid rgba(255, 20, 147, .85);
+    2px solid rgba(255, 20, 147, .9);
 
   box-shadow:
-    0 0 18px rgba(255, 20, 147, .25);
+    0 0 18px rgba(255, 20, 147, .28);
 
   backdrop-filter: blur(4px);
 
@@ -318,21 +352,34 @@ button:active {
   cursor: pointer;
 
   touch-action: none;
+
+  /*
+    Evita seleção e comportamento
+    padrão do navegador.
+  */
+
+  -webkit-user-select: none;
+  user-select: none;
+
+  -webkit-touch-callout: none;
 }
 
 
-/*
-  Botões de movimento
-*/
+/* ============================================================
+   BOTÕES DE MOVIMENTO
+   ============================================================ */
 
 .movement-button {
-  font-size: 25px;
+  width: 64px;
+  height: 64px;
+
+  font-size: 23px;
 }
 
 
-/*
-  Botão de tiro
-*/
+/* ============================================================
+   BOTÃO DE TIRO
+   ============================================================ */
 
 .shoot-button {
   width: 82px;
@@ -340,18 +387,18 @@ button:active {
 
   font-size: 30px;
 
-  border-color: #fff;
-
   color: #fff;
+
+  border-color: #fff;
 
   box-shadow:
     0 0 22px rgba(255, 255, 255, .25);
 }
 
 
-/*
-  Quando o usuário toca no botão
-*/
+/* ============================================================
+   BOTÃO PRESSIONADO
+   ============================================================ */
 
 .touch-button:active,
 .touch-button.active {
@@ -395,7 +442,7 @@ body.touch-device .desktop-controls {
 
 
 /* ============================================================
-   CELULAR
+   MOBILE
    ============================================================ */
 
 @media (max-width: 600px) {
@@ -419,20 +466,43 @@ body.touch-device .desktop-controls {
   }
 
 
+  /*
+    Controles ficam um pouco mais
+    afastados da parte inferior.
+  */
+
   .mobile-controls {
     bottom:
-      max(20px, env(safe-area-inset-bottom));
+      max(
+        24px,
+        env(safe-area-inset-bottom)
+      );
 
     padding-left: 18px;
     padding-right: 18px;
   }
 
 
-  .touch-button {
-    width: 68px;
-    height: 68px;
+  /*
+    Movimento:
+    dois botões juntos no lado esquerdo.
+  */
+
+  .movement-controls {
+    gap: 8px;
   }
 
+
+  .movement-button {
+    width: 64px;
+    height: 64px;
+  }
+
+
+  /*
+    Botão de tiro:
+    lado direito.
+  */
 
   .shoot-button {
     width: 78px;
@@ -443,7 +513,7 @@ body.touch-device .desktop-controls {
 
 
 /* ============================================================
-   CELULARES MUITO PEQUENOS
+   CELULARES PEQUENOS
    ============================================================ */
 
 @media (max-width: 380px) {
@@ -454,11 +524,16 @@ body.touch-device .desktop-controls {
   }
 
 
-  .touch-button {
-    width: 62px;
-    height: 62px;
+  .movement-controls {
+    gap: 6px;
+  }
 
-    font-size: 22px;
+
+  .movement-button {
+    width: 58px;
+    height: 58px;
+
+    font-size: 20px;
   }
 
 
@@ -473,25 +548,25 @@ body.touch-device .desktop-controls {
 
 
 /* ============================================================
-   ORIENTAÇÃO LANDSCAPE
+   CELULAR EM LANDSCAPE
    ============================================================ */
 
 @media (max-height: 500px) {
 
   .mobile-controls {
-    bottom: 12px;
+    bottom: 10px;
   }
 
 
-  .touch-button {
-    width: 58px;
-    height: 58px;
+  .movement-button {
+    width: 56px;
+    height: 56px;
   }
 
 
   .shoot-button {
-    width: 66px;
-    height: 66px;
+    width: 64px;
+    height: 64px;
   }
 
 }
