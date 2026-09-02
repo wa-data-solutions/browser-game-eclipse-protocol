@@ -27,6 +27,8 @@ body {
 
   display: flex;
 
+  flex-direction: column;
+
   justify-content: center;
   align-items: center;
 
@@ -57,6 +59,34 @@ body {
   overflow: hidden;
 
   touch-action: none;
+}
+
+
+/* ============================================================
+   RODAPÉ
+   ============================================================ */
+
+.developer-footer {
+  margin-top: 16px;
+
+  font-size: 12px;
+
+  letter-spacing: 1px;
+
+  color: #ff1493;
+
+  text-align: center;
+
+  user-select: none;
+
+  -webkit-user-select: none;
+}
+
+
+.developer-footer strong {
+  color: #fff;
+
+  font-weight: bold;
 }
 
 
@@ -424,6 +454,11 @@ body.touch-device .desktop-controls {
     height: 100vh;
 
     border: 0;
+  }
+
+
+  .developer-footer {
+    display: none;
   }
 
 
