@@ -63,7 +63,7 @@ body {
 
 
 /* ============================================================
-   RODAPÉ
+   RODAPÉ DESKTOP
    ============================================================ */
 
 .developer-footer {
@@ -87,6 +87,15 @@ body {
   color: #fff;
 
   font-weight: bold;
+}
+
+
+/* ============================================================
+   RODAPÉ MOBILE
+   ============================================================ */
+
+.developer-footer-mobile {
+  display: none;
 }
 
 
@@ -457,8 +466,38 @@ body.touch-device .desktop-controls {
   }
 
 
+  /* Oculta o rodapé externo no mobile */
+
   .developer-footer {
     display: none;
+  }
+
+
+  /* Exibe o rodapé dentro da tela inicial */
+
+  .developer-footer-mobile {
+    display: block;
+
+    margin-top: 45px;
+
+    text-align: center;
+
+    color: #ff1493;
+
+    font-size: 12px;
+
+    letter-spacing: 1px;
+
+    user-select: none;
+
+    -webkit-user-select: none;
+  }
+
+
+  .developer-footer-mobile strong {
+    color: #fff;
+
+    font-weight: bold;
   }
 
 
